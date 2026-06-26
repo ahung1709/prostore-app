@@ -116,3 +116,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+[data-sonner-toast][data-type='error'] {
+  background: #dc2626 !important; /* red-600 */
+  color: white !important;
+  border-color: #b91c1c !important;
+}
