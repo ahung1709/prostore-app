@@ -20,7 +20,7 @@ const AddToCart = ({ item }: { item: CartItem }) => {
     // Handle success add to cart
     toast(
       <div className='flex items-center justify-between gap-2'>
-        <span className='text-sm'>{item.name} added to cart</span>
+        <span className='text-sm'>{res.message}</span>
         <Button
           size='sm'
           className='cursor-pointer'
