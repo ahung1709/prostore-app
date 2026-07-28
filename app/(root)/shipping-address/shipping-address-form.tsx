@@ -224,7 +224,11 @@ const ShippingAddressForm = ({ address }: { address: ShippingAddress }) => {
             </FieldGroup>
           </div>
           <div className='flex gap-2'>
-            <Button type='submit' disabled={isPending}>
+            <Button
+              type='submit'
+              disabled={isPending}
+              className='cursor-pointer'
+            >
               {isPending ? (
                 <Loader className='w-4 h-4 animate-spin' />
               ) : (
