@@ -11,6 +11,7 @@ import {
   Controller,
   useForm,
   ControllerFieldState,
+  SubmitHandler,
 } from 'react-hook-form';
 import { z } from 'zod';
 import slugify from 'slugify';
@@ -18,6 +19,7 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { Field, FieldError, FieldLabel } from '../ui/field';
+import { createProduct, updateProduct } from '@/lib/actions/product.actions';
 
 const ProductForm = ({
   type,
@@ -39,8 +41,45 @@ const ProductForm = ({
       product && type === 'Update' ? product : productDefaultValues,
   });
 
+  const onSubmit: SubmitHandler<z.infer<typeof insertProductSchema>> = async (
+    values,
+  ) => {
+    // On Create
+    if (type === 'Create') {
+      const res = await createProduct(values);
+
+      if (!res.success) {
+        toast.error(res.message);
+      } else {
+        toast.success(res.message);
+        router.push('/admin/products');
+      }
+    }
+
+    // On Update
+    if (type === 'Update') {
+      if (!productId) {
+        router.push('/admin/products');
+        return;
+      }
+
+      const res = await updateProduct({ ...values, id: productId });
+
+      if (!res.success) {
+        toast.error(res.message);
+      } else {
+        toast.success(res.message);
+        router.push('/admin/products');
+      }
+    }
+  };
+
   return (
-    <form className='space-y-8'>
+    <form
+      method='POST'
+      onSubmit={form.handleSubmit(onSubmit)}
+      className='space-y-8'
+    >
       <div className='flex flex-col md:flex-row gap-5'>
         {/* Name */}
         <Controller
