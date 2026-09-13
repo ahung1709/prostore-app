@@ -23,6 +23,7 @@ import { createProduct, updateProduct } from '@/lib/actions/product.actions';
 import { UploadButton } from '@/lib/uploadthing';
 import { Card, CardContent } from '../ui/card';
 import Image from 'next/image';
+import { Checkbox } from '../ui/checkbox';
 
 const ProductForm = ({
   type,
@@ -78,6 +79,8 @@ const ProductForm = ({
   };
 
   const images = form.watch('images');
+  const isFeatured = form.watch('isFeatured');
+  const banner = form.watch('banner');
 
   return (
     <form
@@ -303,7 +306,66 @@ const ProductForm = ({
           )}
         />
       </div>
-      <div className='upload-field'>{/* isFeatured */}</div>
+      <div className='upload-field'>
+        {/* isFeatured */}
+        Featured Product
+        <Card>
+          <CardContent className='space-y-2 mt-2'>
+            <Controller
+              control={form.control}
+              name='isFeatured'
+              render={({
+                field,
+                fieldState,
+              }: {
+                field: ControllerRenderProps<
+                  z.infer<typeof insertProductSchema>,
+                  'isFeatured'
+                >;
+                fieldState: ControllerFieldState;
+              }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <div className='flex items-center gap-2'>
+                    <Checkbox
+                      id={field.name}
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    <FieldLabel htmlFor={field.name}>Is Featured?</FieldLabel>
+                  </div>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            {isFeatured && banner && (
+              <Image
+                src={banner}
+                alt='Banner image'
+                className='w-full object-cover object-center rounded-sm'
+                width={1920}
+                height={680}
+              />
+            )}
+            {isFeatured && !banner && (
+              <UploadButton
+                endpoint='imageUploader'
+                onClientUploadComplete={(res: { ufsUrl: string }[]) => {
+                  form.setValue('banner', res[0].ufsUrl, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                }}
+                onUploadError={(error: Error) => {
+                  toast.error(`ERROR! ${error.message}`);
+                }}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
       <div>
         {/* Description */}
         <Controller
