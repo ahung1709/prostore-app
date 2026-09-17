@@ -25,6 +25,9 @@ import { Card, CardContent } from '../ui/card';
 import Image from 'next/image';
 import { Checkbox } from '../ui/checkbox';
 
+type ProductFormInput = z.input<typeof insertProductSchema>;
+type ProductFormOutput = z.output<typeof insertProductSchema>;
+
 const ProductForm = ({
   type,
   product,
@@ -36,18 +39,13 @@ const ProductForm = ({
 }) => {
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof insertProductSchema>>({
-    resolver:
-      type === 'Update'
-        ? zodResolver(updateProductSchema)
-        : zodResolver(insertProductSchema),
+  const form = useForm<ProductFormInput, unknown, ProductFormOutput>({
+    resolver: zodResolver(insertProductSchema),
     defaultValues:
       product && type === 'Update' ? product : productDefaultValues,
   });
 
-  const onSubmit: SubmitHandler<z.infer<typeof insertProductSchema>> = async (
-    values,
-  ) => {
+  const onSubmit: SubmitHandler<ProductFormOutput> = async (values) => {
     // On Create
     if (type === 'Create') {
       const res = await createProduct(values);
@@ -97,10 +95,7 @@ const ProductForm = ({
             field,
             fieldState,
           }: {
-            field: ControllerRenderProps<
-              z.infer<typeof insertProductSchema>,
-              'name'
-            >;
+            field: ControllerRenderProps<ProductFormInput, 'name'>;
             fieldState: ControllerFieldState;
           }) => (
             <Field data-invalid={fieldState.invalid} className='w-full'>
@@ -123,10 +118,7 @@ const ProductForm = ({
             field,
             fieldState,
           }: {
-            field: ControllerRenderProps<
-              z.infer<typeof insertProductSchema>,
-              'slug'
-            >;
+            field: ControllerRenderProps<ProductFormInput, 'slug'>;
             fieldState: ControllerFieldState;
           }) => (
             <Field data-invalid={fieldState.invalid} className='w-full'>
@@ -165,10 +157,7 @@ const ProductForm = ({
             field,
             fieldState,
           }: {
-            field: ControllerRenderProps<
-              z.infer<typeof insertProductSchema>,
-              'category'
-            >;
+            field: ControllerRenderProps<ProductFormInput, 'category'>;
             fieldState: ControllerFieldState;
           }) => (
             <Field data-invalid={fieldState.invalid} className='w-full'>
@@ -191,10 +180,7 @@ const ProductForm = ({
             field,
             fieldState,
           }: {
-            field: ControllerRenderProps<
-              z.infer<typeof insertProductSchema>,
-              'brand'
-            >;
+            field: ControllerRenderProps<ProductFormInput, 'brand'>;
             fieldState: ControllerFieldState;
           }) => (
             <Field data-invalid={fieldState.invalid} className='w-full'>
@@ -219,10 +205,7 @@ const ProductForm = ({
             field,
             fieldState,
           }: {
-            field: ControllerRenderProps<
-              z.infer<typeof insertProductSchema>,
-              'price'
-            >;
+            field: ControllerRenderProps<ProductFormInput, 'price'>;
             fieldState: ControllerFieldState;
           }) => (
             <Field data-invalid={fieldState.invalid} className='w-full'>
@@ -245,10 +228,7 @@ const ProductForm = ({
             field,
             fieldState,
           }: {
-            field: ControllerRenderProps<
-              z.infer<typeof insertProductSchema>,
-              'stock'
-            >;
+            field: ControllerRenderProps<ProductFormInput, 'stock'>;
             fieldState: ControllerFieldState;
           }) => (
             <Field data-invalid={fieldState.invalid} className='w-full'>
@@ -318,10 +298,7 @@ const ProductForm = ({
                 field,
                 fieldState,
               }: {
-                field: ControllerRenderProps<
-                  z.infer<typeof insertProductSchema>,
-                  'isFeatured'
-                >;
+                field: ControllerRenderProps<ProductFormInput, 'isFeatured'>;
                 fieldState: ControllerFieldState;
               }) => (
                 <Field data-invalid={fieldState.invalid}>
@@ -375,10 +352,7 @@ const ProductForm = ({
             field,
             fieldState,
           }: {
-            field: ControllerRenderProps<
-              z.infer<typeof insertProductSchema>,
-              'description'
-            >;
+            field: ControllerRenderProps<ProductFormInput, 'description'>;
             fieldState: ControllerFieldState;
           }) => (
             <Field data-invalid={fieldState.invalid} className='w-full'>
