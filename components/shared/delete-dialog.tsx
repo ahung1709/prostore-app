@@ -58,6 +58,7 @@ const DeleteDialog = ({
             size='sm'
             disabled={isPending}
             onClick={handleDeleteClick}
+            className='cursor-pointer'
           >
             {isPending ? 'Deleting...' : 'Delete'}
           </Button>
