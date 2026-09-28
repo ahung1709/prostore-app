@@ -14,6 +14,7 @@ import Link from 'next/link';
 import Pagination from '@/components/shared/pagination';
 import { Badge } from '@/components/ui/badge';
 import DeleteDialog from '@/components/shared/delete-dialog';
+import { requireAdmin } from '@/lib/auth-guard';
 
 export const metadata: Metadata = {
   title: 'Admin Users',
@@ -24,6 +25,7 @@ const AdminUserPage = async (props: {
     page: string;
   }>;
 }) => {
+  await requireAdmin();
   const { page = '1' } = await props.searchParams;
 
   const users = await getAllUsers({ page: Number(page) });
