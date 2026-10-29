@@ -28,10 +28,12 @@ import {
   Controller,
   ControllerFieldState,
   ControllerRenderProps,
+  SubmitHandler,
   useForm,
 } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { createUpdateReview } from '@/lib/actions/review.actions';
 
 const ReviewForm = ({
   userId,
@@ -40,17 +42,45 @@ const ReviewForm = ({
 }: {
   userId: string;
   productId: string;
-  onReviewSubmitted?: () => void;
+  onReviewSubmitted: () => void;
 }) => {
   const [open, setOpen] = useState(false);
 
-  const form = useForm<z.infer<typeof insertReviewSchema>>({
+  type ReviewFormInput = z.input<typeof insertReviewSchema>;
+  type ReviewFormOutput = z.output<typeof insertReviewSchema>;
+
+  const form = useForm<ReviewFormInput, unknown, ReviewFormOutput>({
     resolver: zodResolver(insertReviewSchema),
     defaultValues: reviewFormDefaultValues,
   });
 
+  // Open Form Handler
   const handleOpenForm = () => {
+    form.setValue('productId', productId);
+    form.setValue('userId', userId);
+
     setOpen(true);
+  };
+
+  // Submit Form Handler
+  const onSubmit: SubmitHandler<ReviewFormOutput> = async (values) => {
+    const res = await createUpdateReview({ ...values, productId });
+    console.log(res);
+
+    if (!res) {
+      toast.error('Unable to submit review');
+      return;
+    }
+
+    if (!res.success) {
+      toast.error(res.message);
+    }
+
+    setOpen(false);
+
+    onReviewSubmitted();
+
+    toast.success(res.message);
   };
 
   return (
@@ -63,123 +93,115 @@ const ReviewForm = ({
         Write a Review
       </Button>
       <DialogContent className='sm:max-w-[425px]'>
-        <form method='post'>
+        <form method='post' onSubmit={form.handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>Write a Review</DialogTitle>
             <DialogDescription>
               Share your thoughts with other customers
             </DialogDescription>
           </DialogHeader>
-        </form>
-        <div className='grid gap-4 py-4'>
-          <Controller
-            control={form.control}
-            name='title'
-            render={({
-              field,
-              fieldState,
-            }: {
-              field: ControllerRenderProps<
-                z.infer<typeof insertReviewSchema>,
-                'title'
-              >;
-              fieldState: ControllerFieldState;
-            }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Title</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  placeholder='Enter title'
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            control={form.control}
-            name='description'
-            render={({
-              field,
-              fieldState,
-            }: {
-              field: ControllerRenderProps<
-                z.infer<typeof insertReviewSchema>,
-                'description'
-              >;
-              fieldState: ControllerFieldState;
-            }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Description</FieldLabel>
-                <Textarea
-                  {...field}
-                  id={field.name}
-                  placeholder='Enter description'
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            control={form.control}
-            name='rating'
-            render={({
-              field,
-              fieldState,
-            }: {
-              field: ControllerRenderProps<
-                z.infer<typeof insertReviewSchema>,
-                'rating'
-              >;
-              fieldState: ControllerFieldState;
-            }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Rating</FieldLabel>
 
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value.toString()}
-                >
-                  <SelectTrigger
+          <div className='grid gap-4 py-4'>
+            <Controller
+              control={form.control}
+              name='title'
+              render={({
+                field,
+                fieldState,
+              }: {
+                field: ControllerRenderProps<ReviewFormInput, 'title'>;
+                fieldState: ControllerFieldState;
+              }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Title</FieldLabel>
+                  <Input
+                    {...field}
                     id={field.name}
+                    placeholder='Enter title'
                     aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              control={form.control}
+              name='description'
+              render={({
+                field,
+                fieldState,
+              }: {
+                field: ControllerRenderProps<ReviewFormInput, 'description'>;
+                fieldState: ControllerFieldState;
+              }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+                  <Textarea
+                    {...field}
+                    id={field.name}
+                    placeholder='Enter description'
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              control={form.control}
+              name='rating'
+              render={({
+                field,
+                fieldState,
+              }: {
+                field: ControllerRenderProps<ReviewFormInput, 'rating'>;
+                fieldState: ControllerFieldState;
+              }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Rating</FieldLabel>
+
+                  <Select
+                    onValueChange={field.onChange}
+                    value={Number(field.value).toString()}
                   >
-                    <SelectValue />
-                  </SelectTrigger>
+                    <SelectTrigger
+                      id={field.name}
+                      aria-invalid={fieldState.invalid}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
 
-                  <SelectContent>
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <SelectItem key={index} value={(index + 1).toString()}>
-                        {index + 1} <StarIcon className='inline h-4 w-4' />
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    <SelectContent>
+                      {Array.from({ length: 5 }).map((_, index) => (
+                        <SelectItem key={index} value={(index + 1).toString()}>
+                          {index + 1} <StarIcon className='inline h-4 w-4' />
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-        </div>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
 
-        <DialogFooter>
-          <Button
-            type='submit'
-            size='lg'
-            className='w-full cursor-pointer'
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? 'Submitting...' : 'Submit'}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button
+              type='submit'
+              size='lg'
+              className='w-full cursor-pointer'
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? 'Submitting...' : 'Submit'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
