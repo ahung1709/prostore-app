@@ -22,7 +22,6 @@ dotenv.config();
 PurchaseReceiptEmail.PreviewProps = {
   order: {
     id: randomUUID(),
-    // id: crypto.randomUUID(),
     userId: '123',
     user: {
       name: 'John Doe',
